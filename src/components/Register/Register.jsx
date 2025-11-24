@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useFormik } from "formik";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 export default function Register() {
   let [apiError, setApiError] = useState(""); // state to hold API error messages
@@ -169,9 +169,11 @@ export default function Register() {
             ) : (
               ""
             )}
+        <p className="text-center py-3">Already have an account <span><Link className="underline  font-bold text-green-900" to="/login">Login</Link></span></p>
           </fieldset>
         </div>
       </form>
+
     </>
   );
 }
