@@ -106,11 +106,13 @@ export default function Navbar() {
 
           {/* باقي العناصر */}
           <div className="dropdown dropdown-end">
-            <div
+            {userLogin !==null ?<>
+             <div
               tabIndex={0}
               role="button"
               className="btn btn-ghost btn-circle"
             >
+              
               <div className="indicator">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -129,6 +131,8 @@ export default function Navbar() {
                 <span className="badge badge-sm indicator-item">8</span>
               </div>
             </div>
+            </>:<></>}
+           
           </div>
 
           <div className="dropdown dropdown-end">

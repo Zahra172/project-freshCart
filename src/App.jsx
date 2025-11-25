@@ -11,17 +11,18 @@ import Login from './components/Login/Login'
 import Register from './components/Register/Register'
 import Faqs from './components/Faqs/Faqs'
 import UserContextProvider from './Context/UserContext'
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 
 let router = createBrowserRouter([
   {path: '', element: <Layout/> , children: [
-    {index: true , element:<Home/>},
+    {index: true , element:<ProtectedRoute><Home/></ProtectedRoute>},
     {path: 'login' , element:<Login/>},
     {path: 'register' , element:<Register/>},
-    {path:'cart' , element:<Cart/>},
-    {path :'products' , element:<Products/>},
-    {path:'categories' , element:<Categories/>},
-    {path:'brands' , element:<Brands/>},
-    {path:'faqs' , element:<Faqs/>},
+    {path:'cart' , element:<ProtectedRoute><Cart/></ProtectedRoute>},
+    {path :'products' , element:<ProtectedRoute><Products/></ProtectedRoute>},
+    {path:'categories' , element:<ProtectedRoute><Categories/></ProtectedRoute>},
+    {path:'brands' , element:<ProtectedRoute><Brands/></ProtectedRoute>},
+    {path:'faqs' , element:<ProtectedRoute><Faqs/></ProtectedRoute>},
     {path:'*' , element:<Notfound/>}
   ]}
 ])
