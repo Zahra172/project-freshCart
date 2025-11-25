@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useFormik } from "formik";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import { UserContext } from "../../Context/UserContext";
 
 export default function Login() {
+  let {setUserLogin} = useContext(UserContext)
   let [apiError, setApiError] = useState(""); // state to hold API error messages
   let [loading, setLoading] = useState(false); // state to indicate loading status
   let navigate = useNavigate(); // hook to navigate to another page
@@ -19,6 +21,7 @@ export default function Login() {
         setLoading(false); // set loading to false when request ends
         if (res.data?.message === "success") {
           localStorage.setItem("userToken" , res.data.token);
+          setUserLogin(res.data.token);
           navigate("/");
           setLoading(false);
           console.log(res.data);

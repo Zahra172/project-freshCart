@@ -1,7 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { UserContext } from "../../Context/UserContext";
 
 export default function Navbar() {
+  let navigate = useNavigate();
+  let { userLogin, setUserLogin } = useContext(UserContext);
+  function logOut() {
+    localStorage.removeItem("userToken");
+    setUserLogin(null);
+    navigate("/login");
+  }
   // نحدد الثيم أول مرة بناءً على:
   // 1) LocalStorage
   // 2) لو فاضي → ثيم الجهاز
@@ -40,26 +48,31 @@ export default function Navbar() {
 
         <div className="flex-1">
           <ul className="menu menu-horizontal px-1 hidden md:flex">
-            <li>
-              <NavLink to="/">Home</NavLink>
-            </li>
-            <li>
-              <NavLink to="/products">Products</NavLink>
-            </li>
-            <li>
-              <NavLink to="/brands">Brands</NavLink>
-            </li>
-            <li>
-              <NavLink to="/categories">Categories</NavLink>
-            </li>
-            
-              <li>
-                <NavLink to="/login">Login</NavLink>
-              </li>
-              <li>
-                <NavLink to="/register">Register</NavLink>
-              </li>
-           
+            {userLogin !== null ? (
+              <>
+                <li>
+                  <NavLink to="/">Home</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/products">Products</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/brands">Brands</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/categories">Categories</NavLink>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <NavLink to="/login">Login</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/register">Register</NavLink>
+                </li>
+              </>
+            )}
           </ul>
         </div>
 
@@ -144,32 +157,48 @@ export default function Navbar() {
               tabIndex="-1"
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
             >
-              <li>
-                <NavLink to="/" className="justify-between">Home</NavLink>
-              </li>
-              <li>
-                <NavLink to="/products" className={({ isActive }) => isActive ? "text-green-900 font-bold" : ""}>Products</NavLink>
-              </li>
-              <li>
-                <NavLink to="/brands">Brands</NavLink>
-              </li>
-              <li>
-                <NavLink to="/categories">Categories</NavLink>
-              </li>
-              <li>
-                <NavLink to="/faqs">FAQS</NavLink>
-              </li>
-              <li>
-                <NavLink to="/products">Logout</NavLink>
-              </li>
-              <div>
-                <li>
-                  <NavLink to="/login">Login</NavLink>
-                </li>
-                <li>
-                  <NavLink to="/register">Register</NavLink>
-                </li>
-              </div>
+              {userLogin !== null ? (
+                <>
+                  <li>
+                    <NavLink to="/" className="justify-between">
+                      Home
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/products"
+                      className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }
+                    >
+                      Products
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/brands">Brands</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/categories">Categories</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/faqs">FAQS</NavLink>
+                  </li>
+                  <li>
+                    <span to="/products" className="cursor-pointer" onClick={logOut}>
+                      Logout
+                    </span>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <NavLink to="/login">Login</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/register">Register</NavLink>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
         </div>
