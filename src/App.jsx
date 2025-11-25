@@ -10,6 +10,7 @@ import Brands from './components/Brands/Brands'
 import Login from './components/Login/Login'
 import Register from './components/Register/Register'
 import Faqs from './components/Faqs/Faqs'
+import UserContextProvider from './Context/UserContext'
 
 let router = createBrowserRouter([
   {path: '', element: <Layout/> , children: [
@@ -28,10 +29,11 @@ function App() {
   
   return (
     <>
-    
+       <UserContextProvider>
       <RouterProvider router={router}>
         
       </RouterProvider>
+      </UserContextProvider>
     </>
   )
 }

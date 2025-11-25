@@ -18,7 +18,9 @@ export default function Login() {
       .then((res) => {
         setLoading(false); // set loading to false when request ends
         if (res.data?.message === "success") {
+          localStorage.setItem("userToken" , res.data.token);
           navigate("/");
+          setLoading(false);
           console.log(res.data);
         }
       })

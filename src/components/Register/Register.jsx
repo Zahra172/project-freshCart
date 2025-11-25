@@ -17,6 +17,7 @@ export default function Register() {
       .then((res) => {
         setLoading(false); // set loading to false when request ends
         if (res.data?.message === "success") {
+          localStorage.setItem("userToken" , res.data.token);
           navigate("/login");
         }
       })
