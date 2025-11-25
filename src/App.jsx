@@ -12,6 +12,7 @@ import Register from './components/Register/Register'
 import Faqs from './components/Faqs/Faqs'
 import UserContextProvider from './Context/UserContext'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
+import ProductDetails from './components/ProductDetails/ProductDetails'
 
 let router = createBrowserRouter([
   {path: '', element: <Layout/> , children: [
@@ -22,6 +23,7 @@ let router = createBrowserRouter([
     {path :'products' , element:<ProtectedRoute><Products/></ProtectedRoute>},
     {path:'categories' , element:<ProtectedRoute><Categories/></ProtectedRoute>},
     {path:'brands' , element:<ProtectedRoute><Brands/></ProtectedRoute>},
+    {path:'details' , element:<ProtectedRoute><ProductDetails/></ProtectedRoute>},
     {path:'faqs' , element:<ProtectedRoute><Faqs/></ProtectedRoute>},
     {path:'*' , element:<Notfound/>}
   ]}
