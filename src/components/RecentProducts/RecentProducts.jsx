@@ -44,7 +44,7 @@ export default function RecentProducts() {
               className="w-full max-w-sm bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs"
             >
               {/* img */}
-              <Link to="/details">
+              <Link to={`/details/${product.id}/${product.category.name}`}>
                 <img
                   className="rounded-base mb-6"
                   src={product.imageCover}

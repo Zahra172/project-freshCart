@@ -23,7 +23,7 @@ let router = createBrowserRouter([
     {path :'products' , element:<ProtectedRoute><Products/></ProtectedRoute>},
     {path:'categories' , element:<ProtectedRoute><Categories/></ProtectedRoute>},
     {path:'brands' , element:<ProtectedRoute><Brands/></ProtectedRoute>},
-    {path:'details' , element:<ProtectedRoute><ProductDetails/></ProtectedRoute>},
+    {path:'details/:id/:category' , element:<ProtectedRoute><ProductDetails/></ProtectedRoute>},
     {path:'faqs' , element:<ProtectedRoute><Faqs/></ProtectedRoute>},
     {path:'*' , element:<Notfound/>}
   ]}
