@@ -28,7 +28,7 @@ export default function Faqs() {
     <div className="max-w-3xl mx-auto mt-10 px-4">
       <h1 className="text-3xl font-bold text-center mb-6">Frequently Asked Questions</h1>
 
-      <div className="space-y-3">
+      <div className="space-y-3 my-14">
         {faqs.map((item, i) => (
           <div key={i} className="collapse collapse-arrow bg-base-200 shadow-md rounded-lg">
             <input type="checkbox" />
