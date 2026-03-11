@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import React, { useState } from 'react'
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import React, { useState } from "react";
 
 const useProducts = () => {
-    let [page, setPage] = useState(1);
+  let [page, setPage] = useState(1);
 
   // Fetch recent products using React Query
   function getRecentproducts() {
@@ -16,7 +16,6 @@ const useProducts = () => {
   let responseObj = useQuery({
     queryKey: ["recentProducts", page],
     queryFn: getRecentproducts,
-   
   });
 
   // Log the data received from React Query
@@ -24,7 +23,7 @@ const useProducts = () => {
 
   // Update total pages when data changes
   let totalPages = responseObj?.data?.data.metadata.numberOfPages || 0;
-  return {...responseObj,  totalPages, page, setPage}
-}
+  return { ...responseObj, totalPages, page, setPage };
+};
 
-export default useProducts
+export default useProducts;
