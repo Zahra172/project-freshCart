@@ -1,11 +1,25 @@
 
 import { Link } from "react-router-dom";
 import useProducts from "../../Hooks/useProducts";
-
+import { useContext } from "react";
+import { CartContext } from "../../Context/CartContext";
+import toast from 'react-hot-toast';
 export default function RecentProducts() {
   // let [recentProducts, setRecentProducts] = useState([]);
   // let [totalPages, setTotalPages] = useState(0);
+ 
   
+  let {addToCart} =  useContext(CartContext);
+  //function to add product to cart by calling addToCart from CartContext and handling the response
+  function addProductToCart(productId){
+    addToCart(productId).then((response)=>{
+      if(response.status === 200){
+        toast.success("Product added to cart successfully!");
+      }
+    }).catch((error)=>{
+      toast.error(error?.response?.data?.message || "Failed to add product to cart.");
+    })
+  }
   let { data, isLoading, error, isError, totalPages, page, setPage  } =useProducts();
   // function getRecentproducts() {
   //   axios
@@ -93,6 +107,7 @@ export default function RecentProducts() {
 
                 <button
                   type="button"
+                  onClick={()=>addProductToCart(product.id)}
                   className="inline-flex items-center text-white bg-green-700 hover:bg-green-800 box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none"
                 >
                   <svg

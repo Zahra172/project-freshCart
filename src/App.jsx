@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import ProductDetails from "./components/ProductDetails/ProductDetails";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CartContextProvider } from "./Context/CartContext";
+import { Toaster } from "react-hot-toast";
 
 let queryClient = new QueryClient();
 let router = createBrowserRouter([
@@ -92,6 +93,35 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <UserContextProvider>
             <RouterProvider router={router}></RouterProvider>
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                className:
+                  "bg-white text-black dark:bg-gray-800 dark:text-white",
+                style: {
+                  border: "1px solid #e5e7eb",
+                },
+
+                success: {
+                  iconTheme: {
+                    primary: "#22c55e",
+                    secondary: "#fff",
+                  },
+                },
+
+                error: {
+                  style: {
+                    background: "#1f2937",
+                    color: "#fff",
+                    border: "1px solid #374151",
+                  },
+                  iconTheme: {
+                    primary: "#ef4444",
+                    secondary: "#fff",
+                  },
+                },
+              }}
+            />
           </UserContextProvider>
         </QueryClientProvider>
       </CartContextProvider>

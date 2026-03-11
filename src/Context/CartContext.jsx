@@ -7,7 +7,7 @@ export function CartContextProvider(props) {
     token: localStorage.getItem("userToken"),
   };
   function addToCart(productId) {
-    axios.post(
+   return axios.post(
       "https://ecommerce.routemisr.com/api/v1/cart",
       { productId },
       { headers },
