@@ -14,6 +14,7 @@ import UserContextProvider from "./Context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import ProductDetails from "./components/ProductDetails/ProductDetails";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { CartContextProvider } from "./Context/CartContext";
 
 let queryClient = new QueryClient();
 let router = createBrowserRouter([
@@ -87,11 +88,13 @@ let router = createBrowserRouter([
 function App() {
   return (
     <>
-      <QueryClientProvider client={queryClient}>
-        <UserContextProvider>
-          <RouterProvider router={router}></RouterProvider>
-        </UserContextProvider>
-      </QueryClientProvider>
+      <CartContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <UserContextProvider>
+            <RouterProvider router={router}></RouterProvider>
+          </UserContextProvider>
+        </QueryClientProvider>
+      </CartContextProvider>
     </>
   );
 }
