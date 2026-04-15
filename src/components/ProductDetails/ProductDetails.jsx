@@ -1,6 +1,7 @@
 import axios from "axios";
-import React, {  useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import Slider from "react-slick";
 
 export default function ProductDetails() {
   let { id, category } = useParams();
@@ -25,7 +26,7 @@ export default function ProductDetails() {
       .then((response) => {
         let allProducts = response.data.data;
         let related = allProducts.filter(
-          (product) => product.category.name == category
+          (product) => product.category.name == category,
         );
         setRelatedProd(related);
         console.log(related);
@@ -37,11 +38,40 @@ export default function ProductDetails() {
   useEffect(() => {
     getProductDetails(id);
     getRelatedProduct(category);
-  },[id, category]);
+  }, [id, category]);
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 400,
+    slidesToShow: 6,
+    slidesToScroll: 1,
+    autoplay: true,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: { slidesToShow: 3 },
+      },
+      {
+        breakpoint: 768,
+        settings: { slidesToShow: 2 },
+      },
+      {
+        breakpoint: 640,
+        settings: { slidesToShow: 1 },
+      },
+    ],
+  };
+  const settings2 = {
+    dots: true,
+    infinite: true,
+    speed: 400,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
 
   return (
     <>
-      
       <div className="container mx-auto px-6 py-10">
         <div
           className="grid 
@@ -52,22 +82,18 @@ export default function ProductDetails() {
           gap-6 
           justify-items-center "
         >
-          <div className="w-1/2 ">
-            {/* <Slider {...settings}>
-                {prodDetails?.images.map((src) => (
+          <div className="w-1/2">
+            <Slider {...settings2}>
+              {prodDetails?.images?.map((src, index) => (
+                <div key={index}>
                   <img
                     className="w-full rounded-lg"
-                    key={prodDetails.id}
                     src={src}
                     alt={prodDetails?.title}
                   />
-                ))}
-              </Slider> */}
-            <img
-              className="rounded-base mb-6"
-              src={prodDetails?.imageCover}
-              alt={prodDetails?.title}
-            />
+                </div>
+              ))}
+            </Slider>
           </div>
           <div className=" px-5 py-6">
             <h1 className=" text-green-700 font-bold ">{prodDetails?.title}</h1>
@@ -107,62 +133,34 @@ export default function ProductDetails() {
                 Add to cart
               </button>
 
-              {/* <svg
-                  onClick={() => {
-                    toggleWishlist(prodDetails.id);
-                  }}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill={isLiked ? "red" : "none"}
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className={`w-12 h-12 cursor-pointer ${
-                    isLiked ? "text-red-500" : "text-gray-500"
-                  } transform rotate-180 overflow-visible`}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M11.049 2.927C10.259 1.765 8.9 1.765 8.11 2.927 6.759 4.472 3 8.29 3 11.7c0 3.412 2.588 5.79 5.539 5.79 1.65 0 3.083-.852 4.461-2.317 1.378 1.465 2.811 2.317 4.461 2.317 2.951 0 5.539-2.378 5.539-5.79 0-3.41-3.759-7.228-5.11-8.773z"
-                  />
-                </svg> */}
             </div>
           </div>
         </div>
         {/* ////////////////////////////////////////////// */}
         <h5>You May Also Like</h5>
-        <div className=" grid py-4 
-          grid-cols-1 
-          sm:grid-cols-2 
-          md:grid-cols-3 
-          lg:grid-cols-6 
-          gap-6 
-          justify-items-center">
+        <Slider {...settings}>
           {relatedProd.map((product) => (
-            <div
-              key={product.id}
-              className="w-full max-w-sm bg-neutral-primary-soft p-6 border border-default rounded-base shadow-xs"
-            >
-              {/* img */}
-              <Link to={`/details/${product.id}/${product.category.name}`}>
-                <img
-                  className="rounded-base mb-2"
-                  src={product.imageCover}
-                  alt="product image"
-                />
-              </Link>
-              <div className="flex items-center justify-between mt-6">
-                <h5 className="text-base text-heading font-semibold tracking-tight">
-                    {product.title.split(" ").slice(0, 3).join(" ")}
+            <div key={product.id} className="p-2 my-4">
+              <div className="bg-neutral-primary-soft p-4 border rounded shadow h-full">
+                <Link to={`/details/${product.id}/${product.category.name}`}>
+                  <img
+                    className="rounded mb-2 w-full"
+                    src={product.imageCover}
+                    alt={product.title}
+                  />
+                </Link>
+
+                <div className="flex justify-between mt-4">
+                  <h5 className="text-sm font-semibold">
+                    {product.title.split(" ").slice(0, 2).join(" ")}
                   </h5>
-                <span className="text-base font-bold text-heading">
-                  {product.price} EGP
-                </span>
-                 
+
+                  <span className="font-bold">{product.price} EGP</span>
+                </div>
               </div>
             </div>
           ))}
-        </div>
+        </Slider>
       </div>
     </>
   );
