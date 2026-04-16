@@ -107,6 +107,7 @@ export default function Navbar() {
           {/* باقي العناصر */}
           <div className="dropdown dropdown-end">
             {userLogin !==null ?<>
+             <NavLink to="/cart">
              <div
               tabIndex={0}
               role="button"
@@ -131,6 +132,8 @@ export default function Navbar() {
                 <span className="badge badge-sm indicator-item">8</span>
               </div>
             </div>
+             </NavLink>
+             
             </>:<></>}
            
           </div>
