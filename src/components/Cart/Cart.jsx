@@ -2,7 +2,7 @@ import React, { use, useContext, useEffect, useState } from "react";
 import { CartContext } from "../../Context/CartContext";
 
 export default function Cart() {
-  let { getCartItems ,removeCartItems } = useContext(CartContext);
+  let { getCartItems ,removeCartItems ,updateCartItems } = useContext(CartContext);
   let [cartItems, setCartItems] = useState([]);
   // function to display cart items
   function getAllCartItems() {
@@ -15,7 +15,15 @@ export default function Cart() {
         console.log(error);
       });
   }
-
+  // function to update cart items
+  async function updateAllCartItems(productId, count) {
+    if(count < 1){
+      removeItem(productId);
+    }
+    let response = await updateCartItems(productId, count);
+    console.log(response);
+    setCartItems(response.data.data.products);
+  }
   // function to delete from cart
   async function removeItem(productId){
     let response =  await removeCartItems(productId);
@@ -119,9 +127,9 @@ export default function Cart() {
                 {/* quantity */}
                 <td>
                   <div className="flex items-center gap-2">
-                    <button className="btn btn-xs btn-circle">-</button>
+                    <button className="btn btn-xs btn-circle" onClick={()=>updateAllCartItems(item.product.id, item.count-1)}>-</button>
                     <span className="w-6 text-center">{item.count}</span>
-                    <button className="btn btn-xs btn-circle">+</button>
+                    <button className="btn btn-xs btn-circle" onClick={()=>updateAllCartItems(item.product.id, item.count+1)}>+</button>
                   </div>
                 </td>
 
