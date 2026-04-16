@@ -16,14 +16,20 @@ export default function Categories() {
     getCategories();
   },[])
   return (
-    <div>
-      {categories.map((category) => (
-        <div key={category.id}>
-          <h3>{category.name}</h3>
-          <img src={category.image} alt={category.name} />
-        </div>
-      ))}
-
+    <div className="my-14 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+  {categories.map((category) => (
+    <div
+      key={category.id}
+      className="bg-white rounded-2xl shadow p-3 text-center hover:shadow-lg transition"
+    >
+      <img
+        className="w-full h-32 object-cover rounded-xl mb-2"
+        src={category.image}
+        alt={category.name}
+      />
+      <h3 className="text-sm font-semibold">{category.name}</h3>
     </div>
+  ))}
+</div>
   )
 }
