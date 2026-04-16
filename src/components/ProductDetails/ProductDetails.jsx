@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import Slider from "react-slick";
 import { CartContext } from "../../Context/CartContext";
 import toast from "react-hot-toast";
+import { WishlistContext } from "../../Context/WishlistContext";
 
 export default function ProductDetails() {
   let { id, category } = useParams();
@@ -11,16 +12,42 @@ export default function ProductDetails() {
   let [relatedProd, setRelatedProd] = useState([]);
   let [liked, setLiked] = useState(false);
   let { addToCart } = useContext(CartContext);
+  let {addToWishlist ,removeFromWishlist} =useContext(WishlistContext);
 
-  function addProductToCart(productId) {
-    addToCart(productId).then((response)=>{
-      if(response.data.status === "success"){
-        console.log(response);
-        toast.success("Product added to cart successfully!");
+ async function toggleWishlist(productId) {
+  try {
+    if (liked) {
+      // ❤️ remove
+      const response = await removeFromWishlist(productId);
+      if (response.data.status === "success") {
+        toast.success("Removed from wishlist");
+        setLiked(false);
       }
-    }).catch((error)=>{
-      toast.error(error?.response?.data?.message || "Failed to add product to cart.");
-    });
+    } else {
+      // 🤍 add
+      const response = await addToWishlist(productId);
+      if (response.data.status === "success") {
+        toast.success("Added to wishlist");
+        setLiked(true);
+      }
+    }
+  } catch (error) {
+    toast.error("Something went wrong");
+  }
+}
+  function addProductToCart(productId) {
+    addToCart(productId)
+      .then((response) => {
+        if (response.data.status === "success") {
+          console.log(response);
+          toast.success("Product added to cart successfully!");
+        }
+      })
+      .catch((error) => {
+        toast.error(
+          error?.response?.data?.message || "Failed to add product to cart.",
+        );
+      });
   }
   function getProductDetails(id) {
     axios
@@ -123,7 +150,7 @@ export default function ProductDetails() {
             </div>
             <div className="flex items-center gap-4">
               <button
-                  onClick={() => addProductToCart(prodDetails.id)}
+                onClick={() => addProductToCart(prodDetails.id)}
                 type="button"
                 className="inline-flex items-center  text-white bg-green-700 hover:bg-green-800 box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none"
               >
@@ -146,7 +173,13 @@ export default function ProductDetails() {
                 </svg>
                 Add to cart
               </button>
-
+              <button onClick={() => toggleWishlist(prodDetails.id)} >
+                <i
+                  className={`fa-heart text-xl cursor-pointer transition ${
+                    liked ? "fa-solid text-red-500" : "fa-regular text-gray-400"
+                  }`}
+                ></i>
+              </button>
             </div>
           </div>
         </div>
