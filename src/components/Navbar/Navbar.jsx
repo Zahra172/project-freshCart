@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context/UserContext";
+import { CartContext } from "../../Context/CartContext";
 
 export default function Navbar() {
   let navigate = useNavigate();
   let { userLogin, setUserLogin } = useContext(UserContext);
+  let { cartCount, getCartItems } = useContext(CartContext);
   function logOut() {
     localStorage.removeItem("userToken");
     setUserLogin(null);
@@ -27,6 +29,7 @@ export default function Navbar() {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
+    getCartItems();
   }, [theme]);
 
   // دالة تغيير الثيم
@@ -51,19 +54,27 @@ export default function Navbar() {
             {userLogin !== null ? (
               <>
                 <li>
-                  <NavLink to="/">Home</NavLink>
+                  <NavLink to="/" className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }>Home</NavLink>
                 </li>
                 {/* <li>
                   <NavLink to="/products">Products</NavLink>
                 </li> */}
                 <li>
-                  <NavLink to="/wishlist">Wishlist</NavLink>
+                  <NavLink to="/wishlist" className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }>Wishlist</NavLink>
                 </li>
                 <li>
-                  <NavLink to="/brands">Brands</NavLink>
+                  <NavLink to="/brands" className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }>Brands</NavLink>
                 </li>
                 <li>
-                  <NavLink to="/categories">Categories</NavLink>
+                  <NavLink to="/categories" className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }>Categories</NavLink>
                 </li>
               </>
             ) : (
@@ -132,7 +143,7 @@ export default function Navbar() {
                     d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>
-                <span className="badge badge-sm indicator-item">8</span>
+                <span className="badge badge-sm indicator-item">{cartCount}</span>
               </div>
             </div>
              </NavLink>

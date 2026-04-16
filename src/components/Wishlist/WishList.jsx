@@ -56,22 +56,22 @@ export default function WishList() {
               key={product._id}
               className="bg-base-100 shadow rounded-lg p-4 relative"
             >
-              {/* ❤️ remove button */}
+              {/*  remove button */}
               <button
                 onClick={() => removeItem(product._id)}
                 className="absolute top-2 right-2 btn btn-sm btn-circle bg-red-600 text-white"
               >
-                <i className="fa-solid fa-heart"></i>
+                <i className="fa-solid fa-xmark"></i>
               </button>
 
               {/* image */}
-              <Link to={`/details/${product._id}/${product.category.name}`}>
+              
                 <img
                   src={product.imageCover}
                   alt={product.title}
                   className="w-full h-40 object-cover rounded mb-3"
                 />
-              </Link>
+             
 
               {/* title */}
               <h3 className="font-semibold text-sm mb-2">
