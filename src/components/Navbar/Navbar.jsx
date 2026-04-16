@@ -53,8 +53,11 @@ export default function Navbar() {
                 <li>
                   <NavLink to="/">Home</NavLink>
                 </li>
-                <li>
+                {/* <li>
                   <NavLink to="/products">Products</NavLink>
+                </li> */}
+                <li>
+                  <NavLink to="/wishlist">Wishlist</NavLink>
                 </li>
                 <li>
                   <NavLink to="/brands">Brands</NavLink>
@@ -172,26 +175,46 @@ export default function Navbar() {
                     </NavLink>
                   </li>
                   <li>
-                    <NavLink
+                    {/* <NavLink
                       to="/products"
                       className={({ isActive }) =>
                         isActive ? "text-green-900 font-bold" : ""
                       }
                     >
                       Products
+                    </NavLink> */}
+                    <NavLink
+                      to="/wishlist"
+                      className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }
+                    >
+                      WishList
                     </NavLink>
                   </li>
                   <li>
-                    <NavLink to="/brands">Brands</NavLink>
+                    <NavLink to="/brands" className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }>
+                      Brands
+                    </NavLink>
                   </li>
                   <li>
-                    <NavLink to="/categories">Categories</NavLink>
+                    <NavLink to="/categories" className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }>
+                      Categories
+                    </NavLink>
                   </li>
                   <li>
-                    <NavLink to="/faqs">FAQS</NavLink>
+                    <NavLink to="/faqs" className={({ isActive }) =>
+                        isActive ? "text-green-900 font-bold" : ""
+                      }>
+                      FAQS
+                    </NavLink>
                   </li>
                   <li>
-                    <span to="/products" className="cursor-pointer" onClick={logOut}>
+                    <span to="/login" className="cursor-pointer" onClick={logOut}>
                       Logout
                     </span>
                   </li>

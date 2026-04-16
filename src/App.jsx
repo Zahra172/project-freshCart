@@ -16,6 +16,7 @@ import ProductDetails from "./components/ProductDetails/ProductDetails";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CartContextProvider } from "./Context/CartContext";
 import { Toaster } from "react-hot-toast";
+import WishList from "./components/Wishlist/WishList";
 
 let queryClient = new QueryClient();
 let router = createBrowserRouter([
@@ -42,6 +43,14 @@ let router = createBrowserRouter([
         ),
       },
       {
+        path:"wishlist",
+        element:(
+          <ProtectedRoute>
+            <WishList/>
+          </ProtectedRoute>
+        )
+      }
+      ,{
         path: "products",
         element: (
           <ProtectedRoute>
