@@ -10,13 +10,13 @@ export function CartContextProvider(props) {
    return axios.post(
       `https://ecommerce.routemisr.com/api/v1/cart`,
       { productId },
-      { headers },
+      { headers : headers },
     ).then((response)=>{
         console.log(response.data);
         return response;
     }).catch((error)=>{
         console.log(error);
-        return error;
+        throw error;
     });
   }
   return (

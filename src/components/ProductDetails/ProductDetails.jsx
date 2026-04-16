@@ -1,14 +1,27 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Slider from "react-slick";
+import { CartContext } from "../../Context/CartContext";
+import toast from "react-hot-toast";
 
 export default function ProductDetails() {
   let { id, category } = useParams();
   let [prodDetails, setProdDetails] = useState(null);
   let [relatedProd, setRelatedProd] = useState([]);
   let [liked, setLiked] = useState(false);
+  let { addToCart } = useContext(CartContext);
 
+  function addProductToCart(productId) {
+    addToCart(productId).then((response)=>{
+      if(response.data.status === "success"){
+        console.log(response);
+        toast.success("Product added to cart successfully!");
+      }
+    }).catch((error)=>{
+      toast.error(error?.response?.data?.message || "Failed to add product to cart.");
+    });
+  }
   function getProductDetails(id) {
     axios
       .get(`https://ecommerce.routemisr.com/api/v1/products/${id}`)
@@ -110,6 +123,7 @@ export default function ProductDetails() {
             </div>
             <div className="flex items-center gap-4">
               <button
+                  onClick={() => addProductToCart(prodDetails.id)}
                 type="button"
                 className="inline-flex items-center  text-white bg-green-700 hover:bg-green-800 box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none"
               >
