@@ -6,7 +6,7 @@ export function CartContextProvider(props) {
   let headers = {
     token: localStorage.getItem("userToken"),
   };
-
+  // function to display cart items 
   function getCartItems() {
     return axios
       .get(`https://ecommerce.routemisr.com/api/v1/cart`, {
@@ -20,6 +20,7 @@ export function CartContextProvider(props) {
         throw error;
       });
   }
+  // function to add item to cart
   function addToCart(productId) {
     return axios
       .post(
@@ -36,8 +37,20 @@ export function CartContextProvider(props) {
         throw error;
       });
   }
+  // function to remove item from cart
+  function removeCartItems(productId){
+    return axios.delete(`https://ecommerce.routemisr.com/api/v1/cart/${productId}`,
+      {
+      headers:headers
+    }
+    ).then((response)=>{
+      return response;
+    }).catch((error)=>{
+      throw error
+    })
+  }
   return (
-    <CartContext.Provider value={{ addToCart ,getCartItems }}>
+    <CartContext.Provider value={{ addToCart ,getCartItems,removeCartItems }}>
       {props.children}
     </CartContext.Provider>
   );
