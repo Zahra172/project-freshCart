@@ -2,7 +2,7 @@ import React, { use, useContext, useEffect, useState } from "react";
 import { CartContext } from "../../Context/CartContext";
 
 export default function Cart() {
-  let { getCartItems ,removeCartItems ,updateCartItems } = useContext(CartContext);
+  let { getCartItems ,removeCartItems ,updateCartItems ,TotalPrice } = useContext(CartContext);
   let [cartItems, setCartItems] = useState([]);
   // function to display cart items
   function getAllCartItems() {
@@ -146,6 +146,10 @@ export default function Cart() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="flex gap-8 my-4 items-center mt-6">
+        <h2 className="text-2xl font-bold">Total Price: {TotalPrice} EGP</h2>
+        <button className="btn btn-lg px-4 text-white bg-green-600 hover:bg-green-700">Checkout</button>
       </div>
     </>
   );

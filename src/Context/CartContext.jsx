@@ -4,6 +4,7 @@ import { createContext, useState } from "react";
 export const CartContext = createContext();
 export function CartContextProvider(props) {
    let [cartCount, setCartCount] = useState(0);
+   let [TotalPrice, setTotalPrice] = useState(0);
   let headers = {
     token: localStorage.getItem("userToken"),
   };
@@ -16,6 +17,7 @@ export function CartContextProvider(props) {
       .then((response) => {
         console.log(response);
         setCartCount(response.data.numOfCartItems);
+        setTotalPrice(response.data.data.totalCartPrice);
         return response;
       })
       .catch((error) => {
@@ -68,7 +70,7 @@ export function CartContextProvider(props) {
     })
   }
   return (
-    <CartContext.Provider value={{ addToCart ,getCartItems,removeCartItems ,updateCartItems , cartCount}}>
+    <CartContext.Provider value={{ addToCart, getCartItems, removeCartItems, updateCartItems, cartCount, TotalPrice }}>
       {props.children}
     </CartContext.Provider>
   );
