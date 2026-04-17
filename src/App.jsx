@@ -18,6 +18,7 @@ import { CartContextProvider } from "./Context/CartContext";
 import { Toaster } from "react-hot-toast";
 import WishList from "./components/Wishlist/WishList";
 import { WishlistContextProvider } from "./Context/WishlistContext";
+import AllOrders from "./components/AllOrders/AllOrders";
 
 let queryClient = new QueryClient();
 let router = createBrowserRouter([
@@ -44,14 +45,14 @@ let router = createBrowserRouter([
         ),
       },
       {
-        path:"wishlist",
-        element:(
+        path: "wishlist",
+        element: (
           <ProtectedRoute>
-            <WishList/>
+            <WishList />
           </ProtectedRoute>
-        )
-      }
-      ,{
+        ),
+      },
+      {
         path: "products",
         element: (
           <ProtectedRoute>
@@ -91,6 +92,14 @@ let router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "allOrders",
+        element: (
+          <ProtectedRoute>
+            <AllOrders />
+          </ProtectedRoute>
+        ),
+      },
       { path: "*", element: <Notfound /> },
     ],
   },
@@ -99,43 +108,43 @@ let router = createBrowserRouter([
 function App() {
   return (
     <>
-    <WishlistContextProvider>
-      <CartContextProvider>
-        <QueryClientProvider client={queryClient}>
-          <UserContextProvider>
-            <RouterProvider router={router}></RouterProvider>
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                className:
-                  "bg-white text-black dark:bg-gray-800 dark:text-white",
-                style: {
-                  border: "1px solid #e5e7eb",
-                },
-
-                success: {
-                  iconTheme: {
-                    primary: "#22c55e",
-                    secondary: "#fff",
-                  },
-                },
-
-                error: {
+      <WishlistContextProvider>
+        <CartContextProvider>
+          <QueryClientProvider client={queryClient}>
+            <UserContextProvider>
+              <RouterProvider router={router}></RouterProvider>
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  className:
+                    "bg-white text-black dark:bg-gray-800 dark:text-white",
                   style: {
-                    background: "#1f2937",
-                    color: "#fff",
-                    border: "1px solid #374151",
+                    border: "1px solid #e5e7eb",
                   },
-                  iconTheme: {
-                    primary: "#ef4444",
-                    secondary: "#fff",
+
+                  success: {
+                    iconTheme: {
+                      primary: "#22c55e",
+                      secondary: "#fff",
+                    },
                   },
-                },
-              }}
-            />
-          </UserContextProvider>
-        </QueryClientProvider>
-      </CartContextProvider>
+
+                  error: {
+                    style: {
+                      background: "#1f2937",
+                      color: "#fff",
+                      border: "1px solid #374151",
+                    },
+                    iconTheme: {
+                      primary: "#ef4444",
+                      secondary: "#fff",
+                    },
+                  },
+                }}
+              />
+            </UserContextProvider>
+          </QueryClientProvider>
+        </CartContextProvider>
       </WishlistContextProvider>
     </>
   );

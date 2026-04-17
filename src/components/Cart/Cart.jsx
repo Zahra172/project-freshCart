@@ -1,5 +1,6 @@
 import React, { use, useContext, useEffect, useState } from "react";
 import { CartContext } from "../../Context/CartContext";
+import axios from "axios";
 
 export default function Cart() {
   let { getCartItems ,removeCartItems ,updateCartItems ,TotalPrice } = useContext(CartContext);
@@ -31,6 +32,28 @@ export default function Cart() {
     setCartItems(response.data.data.products);
     // setCartItems(prev => prev.filter(item => item.product._id !== productId));
   }
+
+async function checkout() {
+  let { data } = await axios.post(
+    `https://ecommerce.routemisr.com/api/v1/orders/checkout-session/69e0c2dbcff7dd67a8249989`,
+    {
+      shippingAddress: {
+        details: "details",
+        phone: "01010700999",
+        city: "Cairo",
+      },
+    },
+    {
+      params: { url: "http://localhost:5173" },
+      headers: { token: localStorage.getItem("userToken") },
+    }
+  );
+  
+  // الـ API بيرجع session URL، تحتاجي تعملي redirect
+  if (data.session?.url) {
+    window.location.href = data.session.url;
+  }
+}
   useEffect(() => {
     getAllCartItems();
   }, []);
@@ -149,7 +172,7 @@ export default function Cart() {
       </div>
       <div className="flex gap-8 my-4 items-center mt-6">
         <h2 className="text-2xl font-bold">Total Price: {TotalPrice} EGP</h2>
-        <button className="btn btn-lg px-4 text-white bg-green-600 hover:bg-green-700">Checkout</button>
+        <button onClick={checkout} className="btn btn-lg px-4 text-white bg-green-600 hover:bg-green-700">Checkout</button>
       </div>
     </>
   );
