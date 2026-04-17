@@ -10,25 +10,21 @@ export default function ProductDetails() {
   let { id, category } = useParams();
   let [prodDetails, setProdDetails] = useState(null);
   let [relatedProd, setRelatedProd] = useState([]);
-  let [liked, setLiked] = useState(false);
+  // let [liked, setLiked] = useState(false);
   let { addToCart } = useContext(CartContext);
-  let {addToWishlist ,removeFromWishlist} =useContext(WishlistContext);
-
- async function toggleWishlist(productId) {
+  let {addToWishlist ,removeFromWishlist ,wishlist} =useContext(WishlistContext);
+  let liked = wishlist.some((item) => item._id === id || item.id === id);
+async function toggleWishlist(productId) {
   try {
     if (liked) {
-      // ❤️ remove
       const response = await removeFromWishlist(productId);
       if (response.data.status === "success") {
         toast.success("Removed from wishlist");
-        setLiked(false);
       }
     } else {
-      // 🤍 add
       const response = await addToWishlist(productId);
       if (response.data.status === "success") {
         toast.success("Added to wishlist");
-        setLiked(true);
       }
     }
   } catch (error) {

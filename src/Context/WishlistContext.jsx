@@ -1,8 +1,9 @@
 import axios from "axios";
-import { createContext } from "react";
+import { createContext, useState ,useEffect } from "react";
 
 export const WishlistContext = createContext();
 export function WishlistContextProvider(props) {
+   const [wishlist, setWishlist] = useState([]);
     let headers = {
         token: localStorage.getItem("userToken"),
       };
@@ -13,6 +14,7 @@ export function WishlistContextProvider(props) {
         })
           .then((response) => {
             console.log(response);
+            setWishlist(response.data.data);
             return response;
           })
           .catch((error) => {
@@ -26,6 +28,7 @@ export function WishlistContextProvider(props) {
             })
         .then((response) => {
             console.log(response.data);
+            getWishlistItems();
             return response;
             })
         .catch((error) => {
@@ -36,12 +39,16 @@ export function WishlistContextProvider(props) {
         return axios.delete(`https://ecommerce.routemisr.com/api/v1/wishlist/${productId}`,
           { headers:headers }
           ).then((response)=>{
+             getWishlistItems(); 
             return response;
           }).catch((error)=>{
             throw error })
       }
+      useEffect(() => {
+    getWishlistItems(); 
+  }, []);
 return(
-    <WishlistContext.Provider value={{getWishlistItems, addToWishlist, removeFromWishlist}}>
+    <WishlistContext.Provider value={{wishlist, getWishlistItems, addToWishlist, removeFromWishlist}}>
         {props.children}
     </WishlistContext.Provider>
 )
