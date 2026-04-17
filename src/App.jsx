@@ -19,6 +19,7 @@ import { Toaster } from "react-hot-toast";
 import WishList from "./components/Wishlist/WishList";
 import { WishlistContextProvider } from "./Context/WishlistContext";
 import AllOrders from "./components/AllOrders/AllOrders";
+import Address from "./components/Address/Address";
 
 let queryClient = new QueryClient();
 let router = createBrowserRouter([
@@ -99,6 +100,12 @@ let router = createBrowserRouter([
             <AllOrders />
           </ProtectedRoute>
         ),
+      },
+      {
+        path:"address/:cartId",
+        element:(<ProtectedRoute>
+          <Address/>
+        </ProtectedRoute>)
       },
       { path: "*", element: <Notfound /> },
     ],
