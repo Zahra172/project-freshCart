@@ -5,22 +5,19 @@ export const WishlistContext = createContext();
 
 export function WishlistContextProvider(props) {
   const [wishlist, setWishlist] = useState([]);
-
-  /** Always read token fresh from localStorage to avoid stale-token 401s */
   function getHeaders() {
-    return { token: localStorage.getItem("userToken") };
+    return {
+      token: localStorage.getItem("userToken"),
+    };
   }
 
-  /** Fetch wishlist items — silently fails when user is not logged in */
   function getWishlistItems() {
-    const token = localStorage.getItem("userToken");
-    if (!token) return Promise.resolve({ data: { data: [] } });
-
     return axios
       .get(`https://ecommerce.routemisr.com/api/v1/wishlist`, {
         headers: getHeaders(),
       })
       .then((response) => {
+        console.log(response);
         setWishlist(response.data.data);
         return response;
       })
@@ -29,24 +26,25 @@ export function WishlistContextProvider(props) {
       });
   }
 
-  /** Add a product to the wishlist */
   function addToWishlist(productId) {
     return axios
       .post(
         `https://ecommerce.routemisr.com/api/v1/wishlist`,
         { productId },
-        { headers: getHeaders() },
+        {
+          headers: getHeaders(),
+        },
       )
       .then((response) => {
+        console.log(response.data);
         getWishlistItems();
         return response;
       })
       .catch((error) => {
+        console.log(error);
         throw error;
       });
   }
-
-  /** Remove a product from the wishlist */
   function removeFromWishlist(productId) {
     return axios
       .delete(`https://ecommerce.routemisr.com/api/v1/wishlist/${productId}`, {
@@ -60,14 +58,9 @@ export function WishlistContextProvider(props) {
         throw error;
       });
   }
-
-  // Only auto-fetch if user is already logged in
   useEffect(() => {
-    if (localStorage.getItem("userToken")) {
-      getWishlistItems();
-    }
+    getWishlistItems();
   }, []);
-
   return (
     <WishlistContext.Provider
       value={{ wishlist, getWishlistItems, addToWishlist, removeFromWishlist }}
