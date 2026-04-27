@@ -5,12 +5,13 @@ import { Outlet } from "react-router-dom";
 
 export default function Layout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-base-100">
       <Navbar />
 
-      <div className="flex-grow min-h-[60vh] container mx-auto px-4">
+      {/* Main content — grows to fill available space */}
+      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8">
         <Outlet />
-      </div>
+      </main>
 
       <Footer />
     </div>

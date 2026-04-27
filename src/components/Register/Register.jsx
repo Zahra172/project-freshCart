@@ -4,38 +4,41 @@ import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { UserContext } from "../../Context/UserContext";
+import toast from "react-hot-toast";
 
 export default function Register() {
-  let {setUserLogin} = useContext(UserContext)
-  let [apiError, setApiError] = useState(""); // state to hold API error messages
-  let [loading, setLoading] = useState(false); // state to indicate loading status
-  let navigate = useNavigate(); // hook to navigate to another page
+  const { setUserLogin } = useContext(UserContext);
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRePassword, setShowRePassword] = useState(false);
+  const navigate = useNavigate();
 
   function handleRegister(formValues) {
-    //function to handle register
-    setLoading(true); // set loading to true when request starts
-    //formValues = data i want to send el body bta3 el request
+    setLoading(true);
+    setApiError("");
     axios
       .post("https://ecommerce.routemisr.com/api/v1/auth/signup", formValues)
       .then((res) => {
-        setLoading(false); // set loading to false when request ends
         if (res.data?.message === "success") {
-          localStorage.setItem("userToken" , res.data.token);
+          localStorage.setItem("userToken", res.data.token);
           setUserLogin(res.data.token);
-          navigate("/login");
+          toast.success("Account created! Welcome to FreshCart.");
+          navigate("/");
         }
       })
       .catch((err) => {
-        setLoading(false); // set loading to false when request ends
-        setApiError(err?.response?.data?.message);
-        console.log(err?.response?.data?.message);
-      });
+        setApiError(
+          err?.response?.data?.message || "Registration failed. Try again.",
+        );
+      })
+      .finally(() => setLoading(false));
   }
-  ///////////////////////////////////////////////////////////
-  let validationSchema = Yup.object().shape({
+
+  const validationSchema = Yup.object().shape({
     name: Yup.string()
-      .min(3, "Name min 3 chars")
-      .max(15, "Name max 15 chars")
+      .min(3, "Name must be at least 3 characters")
+      .max(15, "Name must be at most 15 characters")
       .required("Name is required"),
     email: Yup.string()
       .email("Invalid email format")
@@ -46,139 +49,212 @@ export default function Register() {
     password: Yup.string()
       .matches(
         /^[A-Z][a-z0-9]{5,10}$/,
-        "Password must start with uppercase letter and be 6-10 chars"
+        "Must start with uppercase and be 6–10 chars",
       )
       .required("Password is required"),
     rePassword: Yup.string()
       .oneOf([Yup.ref("password")], "Passwords must match")
-      .required("RePassword is required"),
+      .required("Please confirm your password"),
   });
 
-  let formik = useFormik({
-    initialValues: {
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
-      rePassword: "",
-    },
-    validationSchema: validationSchema,
+  const formik = useFormik({
+    initialValues: { name: "", email: "", phone: "", password: "", rePassword: "" },
+    validationSchema,
     onSubmit: handleRegister,
   });
-  // useEffect(() => {
-  //   console.log(formik.values)
-  // }, [formik.values])
+
+  // Reusable field component
+  function Field({ id, label, type = "text", placeholder, autoComplete, rightElement }) {
+    const hasError = formik.errors[id] && formik.touched[id];
+    return (
+      <div>
+        <label
+          htmlFor={id}
+          className="block text-sm font-medium text-base-content mb-1.5"
+        >
+          {label}
+        </label>
+        <div className="relative">
+          <input
+            id={id}
+            type={type}
+            name={id}
+            autoComplete={autoComplete}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values[id]}
+            placeholder={placeholder}
+            className={`w-full px-4 py-2.5 ${rightElement ? "pr-11" : ""} rounded-xl border bg-base-100 text-base-content text-sm outline-none transition-colors focus:ring-2 focus:ring-green-500/30 ${
+              hasError
+                ? "border-red-400 focus:border-red-400"
+                : "border-base-300 focus:border-green-500"
+            }`}
+          />
+          {rightElement}
+        </div>
+        {hasError && (
+          <p className="mt-1.5 text-xs text-red-500">{formik.errors[id]}</p>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <>
-      <form onSubmit={formik.handleSubmit}>
-        <div className="  flex justify-center  my-10">
-          <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full md:w-1/3  border p-4">
-            <legend className="fieldset-legend">Register</legend>
-            <label className="label">Name</label>
-            <input
-              type="text"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              value={formik.values.name}
-              name="name"
-              className="input w-full px-2"
-              placeholder="Name"
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="bg-base-100 border border-base-300 rounded-2xl shadow-sm p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <img
+              src="/src/assets/images/freshcart-logo.svg"
+              alt="FreshCart"
+              className="h-9 mx-auto mb-4"
             />
+            <h1 className="text-2xl font-bold text-base-content">
+              Create an account
+            </h1>
+            <p className="text-sm text-base-content/60 mt-1">
+              Join FreshCart and start shopping
+            </p>
+          </div>
 
-            {formik.errors.name && formik.touched.name && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.name}</span>
-              </div>
-            )}
+          {/* API error */}
+          {apiError && (
+            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl px-4 py-3 mb-6 text-sm">
+              <i className="fa-solid fa-circle-exclamation shrink-0" />
+              <span>{apiError}</span>
+            </div>
+          )}
 
-            <label className="label">Email</label>
-            <input
+          <form onSubmit={formik.handleSubmit} noValidate className="space-y-4">
+            <Field
+              id="name"
+              label="Full name"
+              placeholder="John Doe"
+              autoComplete="name"
+            />
+            <Field
+              id="email"
+              label="Email address"
               type="email"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              name="email"
-              value={formik.values.email}
-              className="input w-full px-2"
-              placeholder="Email"
+              placeholder="you@example.com"
+              autoComplete="email"
             />
-            {formik.errors.email && formik.touched.email && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.email}</span>
-              </div>
-            )}
-
-            <label className="label">Phone</label>
-            <input
+            <Field
+              id="phone"
+              label="Phone number"
               type="tel"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              name="phone"
-              value={formik.values.phone}
-              className="input w-full px-2"
-              placeholder="Phone"
+              placeholder="01XXXXXXXXX"
+              autoComplete="tel"
             />
 
-            {formik.errors.phone && formik.touched.phone && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.phone}</span>
+            {/* Password with toggle */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-base-content mb-1.5"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete="new-password"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.password}
+                  placeholder="••••••••"
+                  className={`w-full px-4 py-2.5 pr-11 rounded-xl border bg-base-100 text-base-content text-sm outline-none transition-colors focus:ring-2 focus:ring-green-500/30 ${
+                    formik.errors.password && formik.touched.password
+                      ? "border-red-400"
+                      : "border-base-300 focus:border-green-500"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content/70 transition-colors"
+                  aria-label="Toggle password visibility"
+                >
+                  <i className={`fa-regular ${showPassword ? "fa-eye-slash" : "fa-eye"} text-sm`} />
+                </button>
               </div>
-            )}
+              {formik.errors.password && formik.touched.password && (
+                <p className="mt-1.5 text-xs text-red-500">
+                  {formik.errors.password}
+                </p>
+              )}
+            </div>
 
-            <label className="label">Password</label>
-            <input
-              type="password"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              name="password"
-              value={formik.values.password}
-              className="input w-full px-2"
-              placeholder="Password"
-            />
-            {formik.errors.password && formik.touched.password && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.password}</span>
+            {/* Confirm password */}
+            <div>
+              <label
+                htmlFor="rePassword"
+                className="block text-sm font-medium text-base-content mb-1.5"
+              >
+                Confirm password
+              </label>
+              <div className="relative">
+                <input
+                  id="rePassword"
+                  type={showRePassword ? "text" : "password"}
+                  name="rePassword"
+                  autoComplete="new-password"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.rePassword}
+                  placeholder="••••••••"
+                  className={`w-full px-4 py-2.5 pr-11 rounded-xl border bg-base-100 text-base-content text-sm outline-none transition-colors focus:ring-2 focus:ring-green-500/30 ${
+                    formik.errors.rePassword && formik.touched.rePassword
+                      ? "border-red-400"
+                      : "border-base-300 focus:border-green-500"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRePassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content/70 transition-colors"
+                  aria-label="Toggle confirm password visibility"
+                >
+                  <i className={`fa-regular ${showRePassword ? "fa-eye-slash" : "fa-eye"} text-sm`} />
+                </button>
               </div>
-            )}
-
-            <label className="label">RePassword</label>
-            <input
-              type="password"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              name="rePassword"
-              value={formik.values.rePassword}
-              className="input w-full px-2"
-              placeholder="RePassword"
-            />
-            {formik.errors.rePassword && formik.touched.rePassword && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.rePassword}</span>
-              </div>
-            )}
+              {formik.errors.rePassword && formik.touched.rePassword && (
+                <p className="mt-1.5 text-xs text-red-500">
+                  {formik.errors.rePassword}
+                </p>
+              )}
+            </div>
 
             <button
               type="submit"
               disabled={loading}
-              className=" btn bg-green-600 text-white border-t-green-900 mt-4
-    disabled:bg-gray-400 disabled:text-gray-200 disabled:border-gray-400 disabled:cursor-not-allowed
-              "
+              className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
             >
-              {loading ? "loading..." : "Register"}
+              {loading ? (
+                <>
+                  <span className="loading loading-spinner loading-sm" />
+                  Creating account…
+                </>
+              ) : (
+                "Create account"
+              )}
             </button>
+          </form>
 
-            {/* for errors from api */}
-            {apiError ? (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{apiError}</span>
-              </div>
-            ) : (
-              ""
-            )}
-        <p className="text-center py-3">Already have an account <span><Link className="underline  font-bold text-green-900" to="/login">Login</Link></span></p>
-          </fieldset>
+          <p className="text-center text-sm text-base-content/60 mt-6">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-green-600 hover:text-green-700 transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
         </div>
-      </form>
-
-    </>
+      </div>
+    </div>
   );
 }

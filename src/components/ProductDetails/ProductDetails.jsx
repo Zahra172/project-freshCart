@@ -1,210 +1,276 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Slider from "react-slick";
 import { CartContext } from "../../Context/CartContext";
-import toast from "react-hot-toast";
 import { WishlistContext } from "../../Context/WishlistContext";
+import { UserContext } from "../../Context/UserContext";
+import toast from "react-hot-toast";
+import ProductDetailsSkeleton from "../Skeleton/ProductDetailsSkeleton";
 
 export default function ProductDetails() {
-  let { id, category } = useParams();
-  let [prodDetails, setProdDetails] = useState(null);
-  let [relatedProd, setRelatedProd] = useState([]);
-  // let [liked, setLiked] = useState(false);
-  let { addToCart } = useContext(CartContext);
-  let {addToWishlist ,removeFromWishlist ,wishlist} =useContext(WishlistContext);
-  let liked = wishlist.some((item) => item._id === id || item.id === id);
-async function toggleWishlist(productId) {
-  try {
-    if (liked) {
-      const response = await removeFromWishlist(productId);
-      if (response.data.status === "success") {
-        toast.success("Removed from wishlist");
-      }
-    } else {
-      const response = await addToWishlist(productId);
-      if (response.data.status === "success") {
-        toast.success("Added to wishlist");
-      }
+  const { id, category } = useParams();
+  const navigate = useNavigate();
+  const [prodDetails, setProdDetails] = useState(null);
+  const [relatedProd, setRelatedProd] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const { addToCart } = useContext(CartContext);
+  const { addToWishlist, removeFromWishlist, wishlist } =
+    useContext(WishlistContext);
+  const { userLogin } = useContext(UserContext);
+
+  const isLiked = wishlist.some(
+    (item) => item._id === id || item.id === id,
+  );
+
+  // ── Auth guard ───────────────────────────────────────────────────────
+  function requireAuth() {
+    if (!userLogin) {
+      toast.error("Please sign in or create an account first", {
+        icon: "🔒",
+        duration: 3500,
+      });
+      navigate("/login");
+      return false;
     }
-  } catch (error) {
-    toast.error("Something went wrong");
+    return true;
   }
-}
+
+  // ── Add to cart ──────────────────────────────────────────────────────
   function addProductToCart(productId) {
+    if (!requireAuth()) return;
     addToCart(productId)
-      .then((response) => {
-        if (response.data.status === "success") {
-          console.log(response);
-          toast.success("Product added to cart successfully!");
-        }
+      .then((res) => {
+        if (res.data.status === "success") toast.success("Added to cart!");
       })
-      .catch((error) => {
-        toast.error(
-          error?.response?.data?.message || "Failed to add product to cart.",
-        );
-      });
+      .catch((err) =>
+        toast.error(err?.response?.data?.message || "Failed to add to cart."),
+      );
   }
-  function getProductDetails(id) {
-    axios
-      .get(`https://ecommerce.routemisr.com/api/v1/products/${id}`)
-      .then((response) => {
-        console.log(response.data.data);
-        setProdDetails(response.data.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+
+  // ── Toggle wishlist ──────────────────────────────────────────────────
+  async function toggleWishlist(productId) {
+    if (!requireAuth()) return;
+    try {
+      if (isLiked) {
+        await removeFromWishlist(productId);
+        toast.success("Removed from wishlist");
+      } else {
+        await addToWishlist(productId);
+        toast.success("Added to wishlist!");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    }
   }
-  function getRelatedProduct(category) {
-    axios
-      .get(`https://ecommerce.routemisr.com/api/v1/products`)
-      .then((response) => {
-        let allProducts = response.data.data;
-        let related = allProducts.filter(
-          (product) => product.category.name == category,
-        );
-        setRelatedProd(related);
-        console.log(related);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
+
+  // ── Data fetching ────────────────────────────────────────────────────
   useEffect(() => {
-    getProductDetails(id);
-    getRelatedProduct(category);
+    setLoading(true);
+    Promise.all([
+      axios.get(`https://ecommerce.routemisr.com/api/v1/products/${id}`),
+      axios.get(`https://ecommerce.routemisr.com/api/v1/products`),
+    ])
+      .then(([detailsRes, allRes]) => {
+        setProdDetails(detailsRes.data.data);
+        setRelatedProd(
+          allRes.data.data.filter((p) => p.category.name === category),
+        );
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [id, category]);
 
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 400,
-    slidesToShow: 6,
-    slidesToScroll: 1,
-    autoplay: true,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: { slidesToShow: 3 },
-      },
-      {
-        breakpoint: 768,
-        settings: { slidesToShow: 2 },
-      },
-      {
-        breakpoint: 640,
-        settings: { slidesToShow: 1 },
-      },
-    ],
-  };
-  const settings2 = {
+  // ── Slider configs ───────────────────────────────────────────────────
+  const imageSliderSettings = {
     dots: true,
     infinite: true,
     speed: 400,
     slidesToShow: 1,
     slidesToScroll: 1,
+    arrows: false,
   };
 
+  const relatedSliderSettings = {
+    dots: false,
+    infinite: true,
+    speed: 400,
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    autoplay: true,
+    arrows: true,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: 4 } },
+      { breakpoint: 768, settings: { slidesToShow: 3 } },
+      { breakpoint: 640, settings: { slidesToShow: 2 } },
+      { breakpoint: 400, settings: { slidesToShow: 1 } },
+    ],
+  };
+
+  if (loading) return <ProductDetailsSkeleton />;
+
   return (
-    <>
-      <div className="container mx-auto px-6 py-10">
-        <div
-          className="grid 
-          grid-cols-1 
-          sm:grid-cols-1 
-          md:grid-cols-2 
-          lg:grid-cols-2 
-          gap-6 
-          justify-items-center "
-        >
-          <div className="w-1/2">
-            <Slider {...settings2}>
-              {prodDetails?.images?.map((src, index) => (
-                <div key={index}>
-                  <img
-                    className="w-full rounded-lg"
-                    src={src}
-                    alt={prodDetails?.title}
-                  />
-                </div>
-              ))}
-            </Slider>
-          </div>
-          <div className=" px-5 py-6">
-            <h1 className=" text-green-700 font-bold ">{prodDetails?.title}</h1>
-            <p className="my-6">{prodDetails?.description}</p>
-            <div className="">
-              <span className="font-semibold block my-4">
-                Price : <span>{prodDetails?.price} EGP</span>
-              </span>
-              <span className="font-semibold">Rating : </span>{" "}
-              <span>
-                {prodDetails?.ratingsAverage}{" "}
-                <i className="fa-solid fa-star pb-6 text-yellow-500"></i>
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => addProductToCart(prodDetails.id)}
-                type="button"
-                className="inline-flex items-center  text-white bg-green-700 hover:bg-green-800 box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none"
-              >
+    <div className="py-10">
+      {/* ── Main product section ─────────────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+        {/* Image slider */}
+        <div className="bg-base-200 rounded-2xl overflow-hidden p-4">
+          <Slider {...imageSliderSettings}>
+            {prodDetails?.images?.map((src, index) => (
+              <div key={index}>
+                <img
+                  className="w-full h-80 object-contain rounded-xl"
+                  src={src}
+                  alt={`${prodDetails?.title} - ${index + 1}`}
+                />
+              </div>
+            ))}
+          </Slider>
+        </div>
+
+        {/* Product info */}
+        <div className="space-y-5 py-2">
+          {/* Category badge */}
+          <span className="inline-block text-xs font-semibold uppercase tracking-wider text-green-600 bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full">
+            {prodDetails?.category?.name}
+          </span>
+
+          {/* Title */}
+          <h1 className="text-2xl font-bold text-base-content leading-snug">
+            {prodDetails?.title}
+          </h1>
+
+          {/* Rating */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
                 <svg
-                  className="w-4 h-4 me-1.5"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={24}
-                  height={24}
-                  fill="none"
+                  key={i}
+                  className={`w-4 h-4 ${
+                    i < Math.round(prodDetails?.ratingsAverage)
+                      ? "text-yellow-400"
+                      : "text-base-300"
+                  }`}
+                  fill="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
-                  />
+                  <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
                 </svg>
-                Add to cart
-              </button>
-              <button onClick={() => toggleWishlist(prodDetails.id)} >
-                <i
-                  className={`fa-heart text-xl cursor-pointer transition ${
-                    liked ? "fa-solid text-red-500" : "fa-regular text-gray-400"
-                  }`}
-                ></i>
-              </button>
+              ))}
             </div>
+            <span className="text-sm font-medium text-base-content">
+              {prodDetails?.ratingsAverage}
+            </span>
+            <span className="text-sm text-base-content/50">
+              ({prodDetails?.ratingsQuantity} reviews)
+            </span>
+          </div>
+
+          {/* Description */}
+          <p className="text-sm text-base-content/70 leading-relaxed">
+            {prodDetails?.description}
+          </p>
+
+          {/* Price */}
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold text-base-content">
+              {prodDetails?.price?.toLocaleString()} EGP
+            </span>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={() => addProductToCart(prodDetails?.id)}
+              className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312"
+                />
+              </svg>
+              Add to Cart
+            </button>
+
+            <button
+              onClick={() => toggleWishlist(prodDetails?.id)}
+              aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+              className={`h-12 w-12 rounded-xl border-2 flex items-center justify-center transition-colors ${
+                isLiked
+                  ? "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-500"
+                  : "border-base-300 hover:border-red-400 hover:text-red-400 text-base-content/50"
+              }`}
+            >
+              <i
+                className={`fa-heart text-lg ${
+                  isLiked ? "fa-solid" : "fa-regular"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Meta info */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            {[
+              { label: "Brand", value: prodDetails?.brand?.name || "—" },
+              { label: "Sold", value: `${prodDetails?.sold ?? 0} units` },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                className="bg-base-200 rounded-xl px-4 py-3"
+              >
+                <p className="text-xs text-base-content/50 mb-0.5">{label}</p>
+                <p className="text-sm font-semibold text-base-content">
+                  {value}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
-        {/* ////////////////////////////////////////////// */}
-        <h5>You May Also Like</h5>
-        <Slider {...settings}>
-          {relatedProd.map((product) => (
-            <div key={product.id} className="p-2 my-4">
-              <div className="bg-neutral-primary-soft p-4 border rounded shadow h-full">
-                <Link to={`/details/${product.id}/${product.category.name}`}>
+      </div>
+
+      {/* ── Related products ─────────────────────────────────────────── */}
+      {relatedProd.length > 0 && (
+        <div className="mt-14">
+          <h2 className="text-xl font-bold text-base-content mb-6">
+            You May Also Like
+          </h2>
+          <Slider {...relatedSliderSettings}>
+            {relatedProd.map((product) => (
+              <div key={product.id} className="px-2">
+                <Link
+                  to={`/details/${product.id}/${product.category.name}`}
+                  className="block bg-base-100 border border-base-300 rounded-xl overflow-hidden hover:shadow-md transition-shadow group"
+                >
                   <img
-                    className="rounded mb-2 w-full"
+                    className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300"
                     src={product.imageCover}
                     alt={product.title}
+                    loading="lazy"
                   />
+                  <div className="p-3">
+                    <p className="text-xs font-semibold text-base-content line-clamp-2 mb-1">
+                      {product.title.split(" ").slice(0, 3).join(" ")}
+                    </p>
+                    <p className="text-sm font-bold text-green-600">
+                      {product.price.toLocaleString()} EGP
+                    </p>
+                  </div>
                 </Link>
-
-                <div className="flex justify-between mt-4">
-                  <h5 className="text-sm font-semibold">
-                    {product.title.split(" ").slice(0, 2).join(" ")}
-                  </h5>
-
-                  <span className="font-bold">{product.price} EGP</span>
-                </div>
               </div>
-            </div>
-          ))}
-        </Slider>
-      </div>
-    </>
+            ))}
+          </Slider>
+        </div>
+      )}
+    </div>
   );
 }

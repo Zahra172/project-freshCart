@@ -1,143 +1,202 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useFormik } from "formik";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 
 const Address = () => {
-  let { cartId } = useParams();
-  let [apiError, setApiError] = useState(""); // state to hold API error messages
-  let [loading, setLoading] = useState(false); // state to indicate loading status
-  let navigate = useNavigate(); // hook to navigate to another page
+  const { cartId } = useParams();
+  const navigate = useNavigate();
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function checkout(addressData) {
+    setLoading(true);
+    setApiError("");
     try {
-      setLoading(true);
-
-      let { data } = await axios.post(
+      const { data } = await axios.post(
         `https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartId}`,
+        { shippingAddress: addressData },
         {
-          shippingAddress: addressData,
-        },
-        {
-          params: { url: "http://localhost:5173" },
+          params: { url: window.location.origin },
           headers: { token: localStorage.getItem("userToken") },
         },
       );
-
       if (data.session?.url) {
         window.location.href = data.session.url;
       }
     } catch (error) {
-      setApiError(error?.response?.data?.message || "Something went wrong");
+      const msg = error?.response?.data?.message || "Something went wrong";
+      setApiError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   }
-  let validationSchema = Yup.object().shape({
+
+  const validationSchema = Yup.object().shape({
     details: Yup.string()
-      .min(3, "Details min 3 chars")
-      .max(100, "Details max 100 chars")
-      .required("Details is required"),
+      .min(3, "At least 3 characters")
+      .max(100, "At most 100 characters")
+      .required("Address details are required"),
     phone: Yup.string()
       .matches(/^01[0125][0-9]{8}$/, "Invalid Egyptian phone number")
       .required("Phone is required"),
     city: Yup.string()
-      .min(3, "City min 3 chars")
-      .max(15, "City max 15 chars")
+      .min(3, "At least 3 characters")
+      .max(15, "At most 15 characters")
       .required("City is required"),
   });
 
-  let formik = useFormik({
-    initialValues: {
-      details: "",
-      phone: "",
-      city: "",
-    },
-    validationSchema: validationSchema,
+  const formik = useFormik({
+    initialValues: { details: "", phone: "", city: "" },
+    validationSchema,
     onSubmit: checkout,
   });
 
   return (
-    <>
-      <form onSubmit={formik.handleSubmit}>
-        <div className="  flex justify-center  my-10">
-          <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full md:w-1/3  border p-4">
-            <legend className="fieldset-legend">Address</legend>
-            <label className="label">Details</label>
-            <input
-              type="text"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              value={formik.values.details}
-              name="details"
-              className="input w-full px-2"
-              placeholder="Details"
-            />
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg">
+        <div className="bg-base-100 border border-base-300 rounded-2xl shadow-sm p-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-base-content">
+              Shipping Address
+            </h1>
+            <p className="text-sm text-base-content/60 mt-1">
+              Enter your delivery details to complete the order
+            </p>
+          </div>
 
-            {formik.errors.details && formik.touched.details && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.details}</span>
-              </div>
-            )}
+          {/* API error */}
+          {apiError && (
+            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-xl px-4 py-3 mb-6 text-sm">
+              <i className="fa-solid fa-circle-exclamation shrink-0" />
+              <span>{apiError}</span>
+            </div>
+          )}
 
-            <label className="label">Phone</label>
-            <input
-              type="tel"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              name="phone"
-              value={formik.values.phone}
-              className="input w-full px-2"
-              placeholder="Phone"
-            />
+          <form onSubmit={formik.handleSubmit} noValidate className="space-y-5">
+            {/* Address details */}
+            <div>
+              <label
+                htmlFor="details"
+                className="block text-sm font-medium text-base-content mb-1.5"
+              >
+                Address details
+              </label>
+              <textarea
+                id="details"
+                name="details"
+                rows={3}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.details}
+                placeholder="Street, building, apartment…"
+                className={`w-full px-4 py-2.5 rounded-xl border bg-base-100 text-base-content text-sm outline-none transition-colors focus:ring-2 focus:ring-green-500/30 resize-none ${
+                  formik.errors.details && formik.touched.details
+                    ? "border-red-400"
+                    : "border-base-300 focus:border-green-500"
+                }`}
+              />
+              {formik.errors.details && formik.touched.details && (
+                <p className="mt-1.5 text-xs text-red-500">
+                  {formik.errors.details}
+                </p>
+              )}
+            </div>
 
-            {formik.errors.phone && formik.touched.phone && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.phone}</span>
-              </div>
-            )}
+            {/* Phone */}
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-base-content mb-1.5"
+              >
+                Phone number
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                autoComplete="tel"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.phone}
+                placeholder="01XXXXXXXXX"
+                className={`w-full px-4 py-2.5 rounded-xl border bg-base-100 text-base-content text-sm outline-none transition-colors focus:ring-2 focus:ring-green-500/30 ${
+                  formik.errors.phone && formik.touched.phone
+                    ? "border-red-400"
+                    : "border-base-300 focus:border-green-500"
+                }`}
+              />
+              {formik.errors.phone && formik.touched.phone && (
+                <p className="mt-1.5 text-xs text-red-500">
+                  {formik.errors.phone}
+                </p>
+              )}
+            </div>
 
-            <label className="label">City</label>
-            <input
-              type="text"
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              value={formik.values.city}
-              name="city"
-              className="input w-full px-2"
-              placeholder="City"
-            />
+            {/* City */}
+            <div>
+              <label
+                htmlFor="city"
+                className="block text-sm font-medium text-base-content mb-1.5"
+              >
+                City
+              </label>
+              <input
+                id="city"
+                type="text"
+                name="city"
+                autoComplete="address-level2"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.city}
+                placeholder="Cairo"
+                className={`w-full px-4 py-2.5 rounded-xl border bg-base-100 text-base-content text-sm outline-none transition-colors focus:ring-2 focus:ring-green-500/30 ${
+                  formik.errors.city && formik.touched.city
+                    ? "border-red-400"
+                    : "border-base-300 focus:border-green-500"
+                }`}
+              />
+              {formik.errors.city && formik.touched.city && (
+                <p className="mt-1.5 text-xs text-red-500">
+                  {formik.errors.city}
+                </p>
+              )}
+            </div>
 
-            {formik.errors.city && formik.touched.city && (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{formik.errors.city}</span>
-              </div>
-            )}
+            {/* Secure checkout note */}
+            <div className="flex items-center gap-2 text-xs text-base-content/50 bg-base-200 rounded-xl px-4 py-3">
+              <i className="fa-solid fa-lock text-green-600" />
+              <span>
+                Your payment is secured by Stripe. You'll be redirected to
+                complete payment.
+              </span>
+            </div>
 
             <button
               type="submit"
               disabled={loading}
-              className=" btn bg-green-600 text-white border-t-green-900 mt-4
-    disabled:bg-gray-400 disabled:text-gray-200 disabled:border-gray-400 disabled:cursor-not-allowed
-              "
+              className="w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading ? "loading..." : "Checkout"}
+              {loading ? (
+                <>
+                  <span className="loading loading-spinner loading-sm" />
+                  Processing…
+                </>
+              ) : (
+                <>
+                  <i className="fa-solid fa-credit-card" />
+                  Proceed to Payment
+                </>
+              )}
             </button>
-
-            {/* for errors from api */}
-            {apiError ? (
-              <div className="alert alert-error alert-soft text-sm py-2 mt-1 px-2">
-                <span>{apiError}</span>
-              </div>
-            ) : (
-              ""
-            )}
-          </fieldset>
+          </form>
         </div>
-      </form>
-    </>
+      </div>
+    </div>
   );
 };
 
