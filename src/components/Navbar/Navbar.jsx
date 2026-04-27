@@ -93,7 +93,7 @@ export default function Navbar() {
           {/* ── Logo ──────────────────────────────────────────────────── */}
           <NavLink to="/" className="flex items-center shrink-0">
             <img
-              src="/src/assets/images/freshcart-logo.svg"
+              src="/assets/images/freshcart-logo.svg"
               alt="FreshCart"
               className="h-8 w-auto"
             />
